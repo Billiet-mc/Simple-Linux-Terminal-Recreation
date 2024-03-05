@@ -24,12 +24,8 @@ void execute(int argc, char *argv[]) {
     
     
     
-    //special case commands (pwd, cd, and exit)
-    if (!strcmp(arguments[0], "pwd")) {
-        printf("%s\n", getcwd(NULL, 256));
-    }
-
-    else if (!strcmp(arguments[0], "cd")) {
+    //special case commands (cd and exit)
+    if (!strcmp(arguments[0], "cd")) {
         char *filepath = malloc(256);
         sprintf(filepath, "%s/%s", getcwd(NULL, 256), arguments[1]);
         if (chdir(filepath) != 0 && chdir(arguments[1]) != 0) {
@@ -75,18 +71,8 @@ void executeRedirect(int argc, char *argv[], int hasOut, char *outfilePath, int 
     FILE* infile = hasIn ? fopen(infilePath, "r") : NULL; 
 
 
-    //special case commands (pwd, cd, exit)
-    if (!strcmp(arguments[0], "pwd")) {
-        if (hasOut) {
-            fprintf(outfile, "%s\n", getcwd(NULL, 256));
-            fclose(outfile);
-        }
-        else {
-            printf("%s\n", getcwd(NULL, 256));
-        }
-    }
-
-    else if (!strcmp(arguments[0], "cd")) {
+    //special case commands (cd exit)
+    if (!strcmp(arguments[0], "cd")) {
         char *filepath = malloc(256);
         sprintf(filepath, "%s/%s", getcwd(NULL, 256), arguments[1]);
         if (chdir(filepath) != 0 && chdir(arguments[1]) != 0) {
