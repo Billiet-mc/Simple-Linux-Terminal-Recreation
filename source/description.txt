@@ -1,0 +1,51 @@
+Robert Moore 2/21/24
+
+
+There are two functions declared at the start: 
+void execute(int argc, char *argv[])
+void executeRedirect(int argc, char *argv[], int hasOut, char *outfilePath, int hasIn, char *infilePath)
+
+execute() is a simpler version of executeRedirect that executes a command with no support for redirection,
+while executeRedirect() executes the command while also supporting redirection
+
+both execute() and executeRedirect() start out by taking creating an array of strings called arguments,
+which is just a copy of char *argv[] but with NULL added at the last position in the array
+
+next, both execute and executeRedirect check if the command is a special case (pwd, cd, or exit) and if it
+is then the appropriate command is executeRedirect
+
+if the command is NOT pwd, cd, or exit, then both execute() and executeRedirect() fork a process 
+and execute the command with execvp() with executeRedirect() redirecting the output and/or input to whatever
+filepath is supplied in the arguments
+
+
+
+
+the main() function contains a single while(1) loop that takes first prints out the cwd as a prompt for input
+when input is given, leading whitespace is removed, and the tokenization process begins
+
+the tokenization is done with strtok(input, " \n\r\t"), tokenizing the input by whitespace. Another loop is 
+entered that saves each token to char *tinput[]. If a token contains a '<' or '>', it is seperated into substrings and each one
+is saved to char *tinputp[] as a different token.
+ex. token: "wcda<dwda>Dw" gets saved as: "wcda", "<", "dwda", ">", "Dw"
+the amount of tokens is also saved to int numElements.
+
+next, the main loop checks through char *tinput[] for any syntax errors in the input.
+first, it checks if the first or last token is a "<" or ">". if it is, then an error is thrown
+next, it checks if there are two ">" or "<" tokens in a row, if there are, then an error is thrown
+finally, it checks if a "<" token comes after a ">" token, it it does, then an error is thrown
+
+then the main loop moves on to executing the command in char *tinput[]
+a char *commandBuffer[] is created. then it checks if there is any redirection present in the command.
+if there is no redirection, then execute(numElements, tinput) is called.
+
+if there is redirection the process is more complicated. char *infilePath and char *outfilePath are declared.
+next char *tinput[] is looped through and char *infilePath is set if "<" is present 
+also if "<" or ">" is detected int hasIn or int hasOut is set to 1 respectively
+next char *tinput[] is looped through and if the token is not "<" or ">" then it is added to char *commandBuffer[] until a "<" or ">" is reached
+the command buffer size is also stored in int commandBufferSize
+next char *tinput[] is looped through one more time and whenever a ">" is found, the executeRedirect(commandBufferSize, commandBuffer, hasOut, tinput[i+1], hasIn, infilePath); is called
+finally if the commandBuffer has not been executed yet, (if there was no ">" in char *tinput), the commandBuffer is executeRedirect
+
+
+This program supports command execution and redirection to and from files. 
